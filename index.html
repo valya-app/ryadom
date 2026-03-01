@@ -749,7 +749,10 @@ document.querySelectorAll(".actions-list input").forEach(cb => {
   cb.addEventListener("change", updateActionsCounter);
 });
 
-document.getElementById("saveDay").addEventListener("click", function() {
+document.getElementById("saveDay").addEventListener("click", async function() {
+  const btn = this;
+  btn.disabled = true;
+
   const get = (p) => ({
     resource:  clamp(+document.getElementById(p+"_resource").value  || 0, 0, 10),
     energy:    clamp(+document.getElementById(p+"_energy").value    || 0, 0, 10),
@@ -759,10 +762,24 @@ document.getElementById("saveDay").addEventListener("click", function() {
   });
   const actions = [...document.querySelectorAll(".actions-list input:checked")].map(cb => cb.value);
   const myKey = currentUserRole || "a";
+  const myValues = get(myKey); // снимаем значения до async
+
+  // Перед сохранением подтягиваем актуальные данные партнёра с сервера
+  if (sb && currentPairId) {
+    try {
+      const { data: state } = await sb.from("pair_state")
+        .select("data").eq("pair_id", currentPairId).single();
+      if (state?.data && Object.keys(state.data).length > 0) {
+        currentData = ensureStructure(state.data);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentData));
+      }
+    } catch(e) { /* оффлайн — используем локальные данные */ }
+  }
+
   const existing = currentData.entries[todayKey()] || {};
   const day = {
-    partnerA: myKey === "a" ? get("a") : (existing.partnerA || { resource:0, energy:0, closeness:0, conflict:0, note:"" }),
-    partnerB: myKey === "b" ? get("b") : (existing.partnerB || { resource:0, energy:0, closeness:0, conflict:0, note:"" }),
+    partnerA: myKey === "a" ? myValues : (existing.partnerA || { resource:0, energy:0, closeness:0, conflict:0, note:"" }),
+    partnerB: myKey === "b" ? myValues : (existing.partnerB || { resource:0, energy:0, closeness:0, conflict:0, note:"" }),
     actions
   };
   day.index = calculateIndex(day);
@@ -774,6 +791,7 @@ document.getElementById("saveDay").addEventListener("click", function() {
   setTimeout(() => { status.textContent = ""; }, 3000);
 
   renderAll();
+  btn.disabled = false;
 });
 
 // ─── Calendar ─────────────────────────────────────────────────
@@ -1493,7 +1511,7 @@ function renderToday() {
     if (!data) return;
     ["resource","energy","closeness","conflict"].forEach(f => {
       const el = document.getElementById(prefix + "_" + f);
-      if (el && data[f] !== undefined) el.value = data[f] || "";
+      if (el && data[f] !== undefined) el.value = data[f] ?? "";
     });
     const note = document.getElementById(prefix + "_note");
     if (note && data.note !== undefined) note.value = data.note || "";
