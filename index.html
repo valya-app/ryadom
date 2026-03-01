@@ -650,7 +650,7 @@ function saveData(data) {
   // Синхронизация с Supabase
   if (sb && currentPairId && SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL') {
     sb.from("pair_state")
-      .upsert({ pair_id: currentPairId, data, updated_at: new Date().toISOString() })
+      .upsert({ pair_id: currentPairId, data, updated_at: new Date().toISOString() }, { onConflict: "pair_id" })
       .then(({ error }) => { if (error) console.error("Supabase saveData:", error.message); });
   }
 }
@@ -2428,7 +2428,7 @@ function saveNames(names) {
   // Синхронизация с Supabase
   if (sb && currentPairId && SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL') {
     sb.from("pair_names")
-      .upsert({ pair_id: currentPairId, name_a: names.a || "", name_b: names.b || "" })
+      .upsert({ pair_id: currentPairId, name_a: names.a || "", name_b: names.b || "" }, { onConflict: "pair_id" })
       .then(({ error }) => { if (error) console.error("Supabase saveNames:", error.message); });
   }
 }
