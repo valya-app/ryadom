@@ -1487,7 +1487,29 @@ document.getElementById("editDeleteBtn").addEventListener("click", function() {
 
 // ─── Render all ───────────────────────────────────────────────
 
+function renderToday() {
+  const entry = currentData.entries[todayKey()];
+  const fill = (prefix, data) => {
+    if (!data) return;
+    ["resource","energy","closeness","conflict"].forEach(f => {
+      const el = document.getElementById(prefix + "_" + f);
+      if (el && data[f] !== undefined) el.value = data[f] || "";
+    });
+    const note = document.getElementById(prefix + "_note");
+    if (note && data.note !== undefined) note.value = data.note || "";
+  };
+  if (entry) {
+    fill("a", entry.partnerA);
+    fill("b", entry.partnerB);
+    document.querySelectorAll(".actions-list input").forEach(cb => {
+      cb.checked = Array.isArray(entry.actions) && entry.actions.includes(cb.value);
+    });
+  }
+  updateActionsCounter();
+}
+
 function renderAll() {
+  renderToday();
   renderCalendar();
   renderChart();
   renderForecast();
