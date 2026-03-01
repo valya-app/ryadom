@@ -210,6 +210,7 @@ body.dark .badge-done { color:#81c784; }
   .tabs{gap:4px;}
   .tabs button{padding:6px 10px;font-size:13px;}
   .card{padding:14px;}
+  .btn-text{display:none;}
 }
 </style>
 <!-- Supabase JS -->
@@ -310,11 +311,11 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 <div class="app">
 <header>
   <h2>Рядом</h2>
-  <div style="display:flex;gap:8px;align-items:center;">
-    <button id="syncBtn" class="secondary" title="Синхронизировать данные" style="display:none;">↻</button>
-    <button id="settingsBtn" class="secondary">⚙️ Настройки</button>
-    <button id="themeToggle" class="secondary">Тема</button>
-    <button id="logoutBtn" class="secondary" style="display:none;">Выйти</button>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <button id="syncBtn" class="secondary" title="Синхронизировать данные" style="display:none;padding:6px 10px;">↻</button>
+    <button id="settingsBtn" class="secondary"><span class="btn-icon">⚙️</span><span class="btn-text"> Настройки</span></button>
+    <button id="themeToggle" class="secondary btn-text">Тема</button>
+    <button id="logoutBtn" class="secondary" style="display:none;padding:6px 10px;">✕</button>
   </div>
 </header>
 
