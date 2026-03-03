@@ -2657,7 +2657,12 @@ document.getElementById("auth_create_btn").addEventListener("click", async funct
   // ⚠️ Требует отключения подтверждения email в Supabase: Auth → Settings → Enable email confirmations → OFF
   const { data, error } = await sb.auth.signUp({ email, password: pass });
   if (error) {
-    err.textContent = error.message;
+    const msg = error.message.toLowerCase();
+    if (msg.includes("already") || msg.includes("database error saving new user")) {
+      err.textContent = "Этот email уже зарегистрирован. Войдите через вкладку «Войти».";
+    } else {
+      err.textContent = error.message;
+    }
     this.disabled = false; this.textContent = "Создать аккаунт";
     return;
   }
@@ -2715,7 +2720,12 @@ document.getElementById("auth_join_btn").addEventListener("click", async functio
   // Сначала регистрация
   const { data, error } = await sb.auth.signUp({ email, password: pass });
   if (error) {
-    err.textContent = error.message;
+    const msg = error.message.toLowerCase();
+    if (msg.includes("already") || msg.includes("database error saving new user")) {
+      err.textContent = "Этот email уже зарегистрирован. Войдите через вкладку «Войти».";
+    } else {
+      err.textContent = error.message;
+    }
     this.disabled = false; this.textContent = "Присоединиться";
     return;
   }
