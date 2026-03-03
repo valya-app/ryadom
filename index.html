@@ -248,7 +248,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 
     <div class="auth-tabs">
       <button class="auth-tab active" data-screen="login">Войти</button>
-      <button class="auth-tab" data-screen="create">Создать пару</button>
+      <button class="auth-tab" data-screen="create">Регистрация</button>
       <button class="auth-tab" data-screen="join">Войти в пару</button>
     </div>
 
@@ -2870,9 +2870,22 @@ function subscribeToRealtime() {
       filter: `pair_id=eq.${currentPairId}`
     }, (payload) => {
       if (payload.new?.data) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.new.data));
-        currentData = loadData();
-        // Обновляем только поля партнёра — свои поля не трогаем
+        const myKey = currentUserRole === "a" ? "partnerA" : "partnerB";
+        const today = todayKey();
+        // Сохраняем свои данные за сегодня до перезаписи
+        const myTodayData = currentData.entries?.[today]?.[myKey];
+        const myActions   = currentData.entries?.[today]?.actions;
+
+        currentData = ensureStructure(payload.new.data);
+
+        // Восстанавливаем свои данные за сегодня
+        if (myTodayData) {
+          if (!currentData.entries[today]) currentData.entries[today] = {};
+          currentData.entries[today][myKey] = myTodayData;
+          if (myActions !== undefined) currentData.entries[today].actions = myActions;
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentData));
         renderPartnerSection();
         renderCalendar();
         renderChart();
